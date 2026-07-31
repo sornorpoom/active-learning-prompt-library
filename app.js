@@ -351,19 +351,49 @@ document.addEventListener("DOMContentLoaded", () => {
     function handleRegistrationSubmit(e) {
         e.preventDefault();
 
-        // Save fields
+        const name = regNameInput.value;
+        const email = regEmailInput.value;
+        const school = regSchoolInput.value;
+        const affiliation = regAffiliationInput.value;
+        const purpose = regPurposeInput.value;
+
+        // Save fields locally
         localStorage.setItem("isPromptLibRegistered", "true");
-        localStorage.setItem("reg_name", regNameInput.value);
-        localStorage.setItem("reg_email", regEmailInput.value);
-        localStorage.setItem("reg_school", regSchoolInput.value);
-        localStorage.setItem("reg_affiliation", regAffiliationInput.value);
-        localStorage.setItem("reg_purpose", regPurposeInput.value);
+        localStorage.setItem("reg_name", name);
+        localStorage.setItem("reg_email", email);
+        localStorage.setItem("reg_school", school);
+        localStorage.setItem("reg_affiliation", affiliation);
+        localStorage.setItem("reg_purpose", purpose);
 
         registerModal.classList.add("hidden");
 
         if (selectedPrompt) {
             executeCopy(selectedPrompt.promptText);
         }
+
+        // Send registration to Google Sheet in the background
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbzBSGCvZ_zkfyejY4EfVswRgyl6o0MyQn8Q0FEjdmTKJ87cyWbkH1sTGefBw6TsOgs74A/exec";
+        const payload = {
+            fullName: name,
+            email: email,
+            school: school,
+            affiliation: affiliation,
+            purpose: purpose
+        };
+
+        fetch(scriptUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain"
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            console.log("Registration successfully logged to Google Sheets in background.");
+        })
+        .catch(err => {
+            console.error("Background logging to Google Sheets failed:", err);
+        });
     }
 
     // --- Event Handlers Setup ---
