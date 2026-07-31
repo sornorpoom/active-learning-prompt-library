@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
@@ -25,9 +25,35 @@
                 </div>
             </div>
             <div class="header-actions">
-                <div class="theme-toggle" id="theme-toggle-btn" title="สลับโหมดมืด/สว่าง">
-                    <i data-lucide="moon" class="moon-icon"></i>
-                    <i data-lucide="sun" class="sun-icon"></i>
+                <div class="control-panel">
+                    <!-- Screen Mode Selector -->
+                    <div class="theme-select-group">
+                        <button class="mode-btn active" id="btn-mode-light" title="โหมดสว่าง">
+                            <i data-lucide="sun"></i>
+                            <span>สว่าง</span>
+                        </button>
+                        <button class="mode-btn" id="btn-mode-warm" title="โหมดอบอุ่น">
+                            <i data-lucide="coffee"></i>
+                            <span>อบอุ่น</span>
+                        </button>
+                        <button class="mode-btn" id="btn-mode-dark" title="โหมดมืด">
+                            <i data-lucide="moon"></i>
+                            <span>มืด</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Font Size Selector -->
+                    <div class="font-select-group">
+                        <button class="font-btn" id="btn-font-small" title="ขนาดอักษรเล็ก">
+                            <span>เล็ก</span>
+                        </button>
+                        <button class="font-btn active" id="btn-font-medium" title="ขนาดอักษรกลาง">
+                            <span>กลาง</span>
+                        </button>
+                        <button class="font-btn" id="btn-font-large" title="ขนาดอักษรใหญ่">
+                            <span>ใหญ่</span>
+                        </button>
+                    </div>
                 </div>
                 <span class="badge badge-primary">เชียงใหม่ Lanna Edition v1</span>
             </div>
@@ -186,6 +212,16 @@
                                             <i data-lucide="external-link"></i> ดูภาพความละเอียดสูง
                                         </a>
                                     </div>
+                                </div>
+                                <div class="image-nav-container">
+                                    <button class="action-btn btn-secondary nav-arrow-btn" id="btn-prev-image" title="ภาพก่อนหน้า">
+                                        <i data-lucide="chevron-left"></i>
+                                        <span>ก่อนหน้า (Prev)</span>
+                                    </button>
+                                    <button class="action-btn btn-secondary nav-arrow-btn" id="btn-next-image" title="ภาพถัดไป">
+                                        <span>ถัดไป (Next)</span>
+                                        <i data-lucide="chevron-right"></i>
+                                    </button>
                                 </div>
                             </div>
 

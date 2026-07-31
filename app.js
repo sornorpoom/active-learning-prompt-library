@@ -48,7 +48,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const registerModal = document.getElementById("register-modal");
     const btnCloseModal = document.getElementById("btn-close-modal");
     const registerForm = document.getElementById("register-form");
-    const themeToggleBtn = document.getElementById("theme-toggle-btn");
+
+    // DOM Elements - Theme & Font Selectors
+    const btnModeLight = document.getElementById("btn-mode-light");
+    const btnModeWarm = document.getElementById("btn-mode-warm");
+    const btnModeDark = document.getElementById("btn-mode-dark");
+
+    const btnFontSmall = document.getElementById("btn-font-small");
+    const btnFontMedium = document.getElementById("btn-font-medium");
+    const btnFontLarge = document.getElementById("btn-font-large");
+
+    // DOM Elements - Image navigation buttons
+    const btnPrevImage = document.getElementById("btn-prev-image");
+    const btnNextImage = document.getElementById("btn-next-image");
 
     // Input fields for registration to pre-fill if exists
     const regNameInput = document.getElementById("reg-name");
@@ -59,8 +71,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Core Initialization ---
     async function init() {
-        // Initialize Theme
-        initTheme();
+        // Initialize settings (Theme and Font Size)
+        initSettings();
 
         // Fetch Data
         try {
@@ -88,30 +100,47 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- Theme Control ---
-    function initTheme() {
-        const savedTheme = localStorage.getItem("promptLibTheme") || "light";
-        if (savedTheme === "dark") {
-            document.body.classList.remove("light-theme");
-            document.body.classList.add("dark-theme");
-        } else {
-            document.body.classList.remove("dark-theme");
-            document.body.classList.add("light-theme");
-        }
+    // --- Screen Mode & Font Size Control ---
+    function setScreenMode(mode) {
+        // Remove all theme classes
+        document.body.classList.remove("light-theme", "warm-theme", "dark-theme");
+        document.body.classList.add(`${mode}-theme`);
+        localStorage.setItem("promptLibTheme", mode);
+
+        // Update active class on buttons
+        const modeButtons = [btnModeLight, btnModeWarm, btnModeDark];
+        modeButtons.forEach(btn => {
+            if (btn) btn.classList.remove("active");
+        });
+
+        const activeBtn = document.getElementById(`btn-mode-${mode}`);
+        if (activeBtn) activeBtn.classList.add("active");
+        
         lucide.createIcons();
     }
 
-    function toggleTheme() {
-        if (document.body.classList.contains("light-theme")) {
-            document.body.classList.remove("light-theme");
-            document.body.classList.add("dark-theme");
-            localStorage.setItem("promptLibTheme", "dark");
-        } else {
-            document.body.classList.remove("dark-theme");
-            document.body.classList.add("light-theme");
-            localStorage.setItem("promptLibTheme", "light");
-        }
-        lucide.createIcons();
+    function setFontSize(size) {
+        // Remove all font classes from html
+        document.documentElement.classList.remove("font-sz-small", "font-sz-medium", "font-sz-large");
+        document.documentElement.classList.add(`font-sz-${size}`);
+        localStorage.setItem("promptLibFontSize", size);
+
+        // Update active class on buttons
+        const fontButtons = [btnFontSmall, btnFontMedium, btnFontLarge];
+        fontButtons.forEach(btn => {
+            if (btn) btn.classList.remove("active");
+        });
+
+        const activeBtn = document.getElementById(`btn-font-${size}`);
+        if (activeBtn) activeBtn.classList.add("active");
+    }
+
+    function initSettings() {
+        const savedTheme = localStorage.getItem("promptLibTheme") || "light";
+        setScreenMode(savedTheme);
+
+        const savedFontSize = localStorage.getItem("promptLibFontSize") || "medium";
+        setFontSize(savedFontSize);
     }
 
     // --- Filter Logic ---
@@ -223,6 +252,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // Scroll workspace to top
         document.getElementById("workspace-container").scrollTop = 0;
         
+        // Update Image navigation buttons state
+        updateImageNavigator();
+
         // Re-trigger Lucide Icons
         lucide.createIcons();
     }
@@ -234,6 +266,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
         activeWorkspace.classList.add("hidden");
         welcomeScreen.classList.remove("hidden");
+        
+        // Also update image navigation
+        updateImageNavigator();
+    }
+
+    function updateImageNavigator() {
+        if (!selectedPrompt || filteredPrompts.length === 0) {
+            if (btnPrevImage) btnPrevImage.disabled = true;
+            if (btnNextImage) btnNextImage.disabled = true;
+            return;
+        }
+
+        const currentIndex = filteredPrompts.findIndex(p => p.id === selectedPrompt.id);
+        
+        if (btnPrevImage) btnPrevImage.disabled = currentIndex <= 0;
+        if (btnNextImage) btnNextImage.disabled = currentIndex === -1 || currentIndex >= filteredPrompts.length - 1;
+    }
+
+    function updateActiveCardInList(promptId) {
+        const cards = promptItemsContainer.querySelectorAll(".prompt-item-card");
+        let targetCard = null;
+        
+        cards.forEach(card => {
+            const cardCode = card.querySelector(".item-code").textContent;
+            if (cardCode === promptId) {
+                card.classList.add("active");
+                targetCard = card;
+            } else {
+                card.classList.remove("active");
+            }
+        });
+
+        if (targetCard) {
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
     }
 
     function updatePaginationControls() {
@@ -349,8 +416,40 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // Theme Toggle
-        themeToggleBtn.addEventListener("click", toggleTheme);
+        // Screen Mode Selectors
+        if (btnModeLight) btnModeLight.addEventListener("click", () => setScreenMode("light"));
+        if (btnModeWarm) btnModeWarm.addEventListener("click", () => setScreenMode("warm"));
+        if (btnModeDark) btnModeDark.addEventListener("click", () => setScreenMode("dark"));
+
+        // Font Size Selectors
+        if (btnFontSmall) btnFontSmall.addEventListener("click", () => setFontSize("small"));
+        if (btnFontMedium) btnFontMedium.addEventListener("click", () => setFontSize("medium"));
+        if (btnFontLarge) btnFontLarge.addEventListener("click", () => setFontSize("large"));
+
+        // Image & Prompt Navigation Buttons
+        if (btnPrevImage) {
+            btnPrevImage.addEventListener("click", () => {
+                if (!selectedPrompt) return;
+                const currentIndex = filteredPrompts.findIndex(p => p.id === selectedPrompt.id);
+                if (currentIndex > 0) {
+                    const prevPrompt = filteredPrompts[currentIndex - 1];
+                    selectPrompt(prevPrompt);
+                    updateActiveCardInList(prevPrompt.id);
+                }
+            });
+        }
+
+        if (btnNextImage) {
+            btnNextImage.addEventListener("click", () => {
+                if (!selectedPrompt) return;
+                const currentIndex = filteredPrompts.findIndex(p => p.id === selectedPrompt.id);
+                if (currentIndex !== -1 && currentIndex < filteredPrompts.length - 1) {
+                    const nextPrompt = filteredPrompts[currentIndex + 1];
+                    selectPrompt(nextPrompt);
+                    updateActiveCardInList(nextPrompt.id);
+                }
+            });
+        }
 
         // Copy
         btnCopyPrompt.addEventListener("click", copyPromptText);
